@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#040611">
+<title>Teleport Rush — Premium 9:16</title>
+<style>
+
+:root{--bg:#02040b;--panel:#071126;--panel2:#0b1730;--edge:#245b80;--cyan:#24dcff;--violet:#a85cff;--gold:#ffd34f;--white:#f3f8ff;--muted:#89a5c2;--red:#ff4e6a;--blue:#37a9ff;--green:#39e5a0;--yellow:#ffd34f;--shadow:0 14px 36px rgba(0,0,0,.5),inset 0 0 30px rgba(32,217,255,.05)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02030a;color:var(--white);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.screen{position:absolute;inset:0;display:none}.screen.active{display:flex}
+body:before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(circle at 20% 10%,rgba(40,120,255,.2),transparent 27%),radial-gradient(circle at 85% 30%,rgba(168,85,255,.18),transparent 30%),linear-gradient(155deg,#02040b,#071128 55%,#100622)}
+body:after{content:"";position:fixed;inset:0;z-index:-2;opacity:.48;background-image:radial-gradient(#fff 0 1px,transparent 1.5px);background-size:83px 71px;pointer-events:none}
+.glass{background:linear-gradient(145deg,rgba(9,21,43,.96),rgba(3,9,22,.94));border:1px solid rgba(53,126,181,.48);box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+.btn{border:1px solid #2f7ba7;border-radius:13px;min-height:42px;padding:9px 13px;background:linear-gradient(145deg,#0e3560,#071a35);color:#fff;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.08);transition:.16s}
+.btn:active{transform:scale(.98)}.btn.gold{background:linear-gradient(145deg,#ffe36a,#e28b12);color:#171000;border-color:#ffeaa2}.btn.purple{background:linear-gradient(145deg,#914cf0,#35116b);border-color:#c28cff}.btn.ghost{background:#071226cc}.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Setup */
+#setupScreen{align-items:center;justify-content:center;padding:12px}
+.setup{width:min(94vw,560px);max-height:96dvh;overflow:auto;padding:20px;border-radius:25px}
+.logo{text-align:center;font-size:clamp(42px,12vw,70px);line-height:.78;font-weight:1000;letter-spacing:-4px;background:linear-gradient(180deg,#fff,#ffd746 38%,#ff8e25 63%,#29e4ff 92%);-webkit-background-clip:text;color:transparent}
+.tag{text-align:center;margin:10px 0 18px;font-size:10px;font-weight:900;letter-spacing:2.6px}
+.sectionTitle{font-size:10px;color:#83a9ca;font-weight:1000;letter-spacing:1.5px;margin:13px 0 7px}.modeRow,.countRow{display:flex;gap:7px}.modeRow .btn,.countRow .btn{flex:1;font-size:10px}.selected{outline:2px solid var(--cyan);box-shadow:0 0 18px rgba(36,220,255,.2)}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{padding:9px;border:1px solid #1c4264;border-radius:13px;background:#040c1b}.field label{display:block;font-size:9px;font-weight:900;color:#aac4dc;margin-bottom:5px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.field input{width:100%;padding:9px;border-radius:9px;border:1px solid #31516e;background:#071329;color:#fff;outline:none}.field input:focus{border-color:var(--cyan)}
+.setupActions{display:flex;gap:8px;margin-top:12px}.setupActions>*{flex:1}
+
+/* Portrait 9:16 game */
+#gameScreen{padding:max(6px,env(safe-area-inset-top)) 6px max(6px,env(safe-area-inset-bottom));gap:6px;flex-direction:column}
+.topbar{height:45px;min-height:45px;border-radius:15px;padding:4px 7px;display:flex;align-items:center;gap:7px}
+.brandMini{font-size:15px;font-weight:1000;letter-spacing:-.8px;background:linear-gradient(90deg,#ffd34f,#fff,#28ddff);-webkit-background-clip:text;color:transparent}
+.turnBadge{padding:7px 9px;border-radius:10px;border:1px solid #27648b;background:#06142a;font-size:9px;font-weight:1000;white-space:nowrap}.spacer{flex:1}.icon{width:34px;height:32px;border-radius:10px;background:#061329;border:1px solid #315979;color:#fff;font-size:14px}
+
+/* Mobile game stack: dimension/map, main board, controls */
+.layout{min-height:0;flex:1;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.left,.right,.center{min-height:0;min-width:0}.left{order:1}.center{order:2}.right{order:3}
+.panel{border-radius:17px;overflow:hidden}.left{height:31%;padding:7px}.center{height:44%;display:flex}.right{height:25%;padding:7px;display:grid;grid-template-columns:1.05fr .95fr;grid-template-rows:auto 1fr;gap:6px}
+.panelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px}.panelTitle{font-size:10px;font-weight:1000;letter-spacing:1px}.panelSub{font-size:8px;color:#7998b7;font-weight:800}
+
+/* Dimension scene + 15-space escape map */
+#normalPanel{height:100%;display:flex;flex-direction:column}
+#dimensionPanel{height:100%;display:grid;grid-template-columns:42% 58%;grid-template-rows:22px 1fr;column-gap:7px}
+#dimensionPanel .panelHead{grid-column:1/-1}
+.dimensionScene{grid-column:1;grid-row:2;height:100%;min-height:0;border-radius:13px;overflow:hidden;position:relative;border:1px solid #3a6d95;background:#101044;box-shadow:inset 0 0 35px rgba(70,210,255,.08)}
+.sceneStars{position:absolute;inset:0;background-image:radial-gradient(#fff 0 1px,transparent 1.6px);background-size:31px 27px;opacity:.5}.sceneGlow{position:absolute;width:110px;height:110px;border-radius:50%;left:50%;top:43%;transform:translate(-50%,-50%);border:2px solid #35ddff;box-shadow:0 0 25px #20d9ff,inset 0 0 22px #20d9ff;animation:spin 7s linear infinite}.sceneGlow:before,.sceneGlow:after{content:"";position:absolute;border-radius:50%;inset:15px;border:2px solid #a85cff;box-shadow:0 0 15px #a85cff}.sceneGlow:after{inset:31px;border-color:#fff;opacity:.4}.sceneObject{position:absolute;left:5%;right:5%;bottom:0;height:48%;background:#111d44;clip-path:polygon(0 100%,0 62%,12% 45%,22% 65%,34% 28%,47% 60%,58% 35%,71% 56%,84% 29%,100% 55%,100% 100%)}.sceneCity{display:none;position:absolute;left:4%;right:4%;bottom:0;height:48%;background:repeating-linear-gradient(90deg,#0c1741 0 9px,#2a175a 10px 16px);clip-path:polygon(0 100%,0 55%,8% 55%,8% 25%,17% 25%,17% 43%,27% 43%,27% 12%,36% 12%,36% 56%,49% 56%,49% 30%,60% 30%,60% 50%,73% 50%,73% 17%,82% 17%,82% 59%,100% 59%,100% 100%)}
+.sceneLabel{position:absolute;left:8px;right:5px;bottom:7px;z-index:4}.sceneTitle{font-size:13px;font-weight:1000;text-shadow:0 2px 10px #000}.badge{display:inline-block;margin-top:3px;padding:3px 6px;border-radius:7px;background:#030814dd;border:1px solid #ffbf3f;color:#ffdc69;font-size:7px;font-weight:1000}
+.challenge{grid-column:2;grid-row:2;min-width:0;padding:8px;border-radius:13px;background:linear-gradient(145deg,#07172d,#040b18);border:1px solid #285c82;overflow:hidden}.challengeTop{display:flex;justify-content:space-between;align-items:end;gap:5px}.challengeTitle{font-size:8px;font-weight:1000}.challengeScore{font-size:18px;font-weight:1000;color:#2be0ff;white-space:nowrap}.challengeText{font-size:9px;color:#fff;font-weight:900;margin-top:2px}.bar{height:7px;background:#020813;border-radius:99px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#20d9ff,#a855ff,#ffd34f);box-shadow:0 0 12px #20d9ff;transition:width .3s}.challengeBottom{display:flex;justify-content:space-between;font-size:7px;color:#91acc7}
+.rollHistory{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap}.rollDot{min-width:21px;height:18px;padding:1px 3px;border-radius:6px;background:#0a1b31;border:1px solid #28506f;display:grid;place-items:center;font-size:9px;font-weight:900}.rollHint{font-size:7px;color:#87a5c1;line-height:1.25;margin-top:5px}
+
+/* 15-number inside teleport map */
+.escapeMapWrap{margin-top:6px;padding:6px;border-radius:10px;background:#030916;border:1px solid #234b69}.escapeMapTitle{font-size:8px;font-weight:1000;color:#a9c7df;letter-spacing:1px;margin-bottom:5px}.escapeMap{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}.escapeCell{height:22px;border-radius:6px;display:grid;place-items:center;position:relative;background:linear-gradient(145deg,#182d47,#0a1729);border:1px solid #2a526d;color:#a9bfd2;font-size:8px;font-weight:1000}.escapeCell.target{border-color:#ffd34f;color:#ffe47a;box-shadow:0 0 9px rgba(255,211,79,.25)}.escapeCell.current{border-color:#28e0ff;color:#fff;box-shadow:0 0 12px rgba(36,220,255,.7),inset 0 0 9px rgba(36,220,255,.18)}.escapeToken{position:absolute;width:12px;height:12px;border-radius:50%;border:1px solid #fff;right:2px;bottom:2px;box-shadow:0 0 8px currentColor}.zeroBadge{font-size:7px;color:#7e9bb8;margin-top:3px}
+
+/* Main board */
+.boardShell{width:100%;height:100%;padding:5px;border-radius:17px;background:linear-gradient(145deg,#091d38,#050b1b);border:1px solid #2a628a;box-shadow:0 0 28px rgba(34,210,255,.1),inset 0 0 35px rgba(168,85,255,.06)}
+.boardTitle{height:18px;display:flex;align-items:center;justify-content:center;color:#a9c7df;font-size:7px;font-weight:1000;letter-spacing:1px}.board{height:calc(100% - 18px);display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(10,1fr);gap:3px;padding:3px;border-radius:12px;background:radial-gradient(circle at 50% 50%,rgba(33,118,154,.18),transparent 50%),linear-gradient(180deg,#08172d,#040b18)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #405d72;background:linear-gradient(145deg,#5b6871,#26323e 75%);font-weight:1000;font-size:clamp(9px,3vw,14px);color:#f4f7fa;box-shadow:inset 0 2px 3px rgba(255,255,255,.16),inset 0 -6px 10px rgba(0,0,0,.25);overflow:hidden}.cellNum{position:relative;z-index:3}.cell.start{border-color:#22dfff;box-shadow:0 0 15px rgba(34,223,255,.7),inset 0 0 15px rgba(34,223,255,.13)}.cell.finish{background:linear-gradient(145deg,#ffe77a,#b87917);color:#372000;border-color:#fff0a2;box-shadow:0 0 23px rgba(255,207,59,.85),inset 0 0 18px #fff2a6}.cell.portal{background:linear-gradient(145deg,#241247,#100820);border-color:#a855ff;box-shadow:0 0 11px rgba(168,85,255,.6),inset 0 0 12px rgba(168,85,255,.18)}.portalRing{position:absolute;width:57%;height:57%;border-radius:50%;border:2px solid #35ddff;box-shadow:0 0 8px #35ddff,inset 0 0 7px #35ddff;animation:spin 4s linear infinite;opacity:.95}.portalRing:after{content:"";position:absolute;inset:25%;border-radius:50%;border:1px solid #b45cff}.tokenLayer{position:absolute;inset:2px;display:flex;align-items:flex-end;justify-content:flex-start;gap:2px;flex-wrap:wrap;padding:2px;z-index:5}.token{width:clamp(12px,3.7vw,20px);height:clamp(12px,3.7vw,20px);border-radius:50%;border:2px solid #fff;box-shadow:0 0 9px currentColor,inset 3px 3px 5px rgba(255,255,255,.45);animation:float 2.3s ease-in-out infinite}.token.red{background:#ff3859;color:#ff4964}.token.blue{background:#149eff;color:#31a9ff}.token.green{background:#18d78d;color:#35e39b}.token.yellow{background:#ffc52e;color:#ffd34e}
+
+/* Right controls */
+.diceCard{grid-column:1;grid-row:1/3;padding:7px;border-radius:14px;background:linear-gradient(145deg,#081a35,#040b18);border:1px solid #2c648b;text-align:center;display:flex;flex-direction:column;justify-content:center}.dice{width:55px;height:55px;margin:0 auto 4px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#fff,#b8cedc);color:#07101a;font-size:37px;box-shadow:0 0 18px rgba(32,217,255,.3),inset 0 -6px 10px rgba(0,0,0,.12)}.dice.roll{animation:roll .62s ease-in-out}.rollMode{font-size:9px;font-weight:1000;color:#24dcff;letter-spacing:.8px}.rollSub{font-size:7px;color:#7597b6;margin-top:2px}.rollBtn{width:100%;margin-top:5px;min-height:35px;font-size:9px}
+.turnCard{padding:6px 8px;border-radius:11px;background:#061329;border:1px solid #285775;overflow:hidden}.turnLabel{font-size:7px;color:#7e9bb8;font-weight:900;letter-spacing:1px}.turnName{font-size:14px;font-weight:1000;margin-top:1px}.turnStatus{font-size:7px;color:#8ca8c2}.playersTitle{display:none}.players{display:none}.recentTitle{font-size:8px;font-weight:1000;letter-spacing:1px;display:none}.recent{display:none}.actions{display:none}
+
+/* Overlay */
+.overlay{position:absolute;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.74)}.overlay.show{display:flex}.modal{width:min(92vw,520px);max-height:90dvh;overflow:auto;padding:18px;border-radius:20px}.modal h2{margin:0 0 6px}.modal p{font-size:12px;line-height:1.4;color:#a9c0d7}.modalBtns{display:flex;gap:8px}.modalBtns>*{flex:1}.winOrb{width:72px;height:72px;border-radius:50%;margin:5px auto 10px;background:radial-gradient(circle at 32% 24%,#fff,#ffe15c 18%,#ff7d18 57%,#7a2100);border:4px solid #fff0a1;box-shadow:0 0 35px #ffc83d;animation:float 2s infinite}.winTitle{text-align:center;font-size:clamp(26px,8vw,45px);font-weight:1000;color:#ffd95a}.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}.confetti i{position:absolute;width:5px;height:12px;background:#fff;top:-20px;animation:fall 2.8s linear infinite}
+
+/* Themes */
+.theme-galaxy .sceneGlow{border-color:#39e5ff}.theme-cyber{background:linear-gradient(160deg,#21083c,#061c3d)!important}.theme-cyber .sceneCity{display:block}.theme-cyber .sceneObject{display:none}.theme-jungle{background:linear-gradient(160deg,#062d1e,#12310f)!important}.theme-water{background:linear-gradient(160deg,#04385d,#031726)!important}.theme-volcano{background:linear-gradient(160deg,#4b1008,#170907)!important}.theme-volcano .sceneGlow{border-color:#ff8a24;box-shadow:0 0 30px #ff541c}.theme-ice{background:linear-gradient(160deg,#0a3853,#08162c)!important}.theme-egypt{background:linear-gradient(160deg,#62400f,#1c1107)!important}.theme-sky{background:linear-gradient(160deg,#1a5a9b,#08152f)!important}.theme-robot{background:linear-gradient(160deg,#26303b,#080d15)!important}.theme-pirate{background:linear-gradient(160deg,#075268,#061827)!important}.theme-candy{background:linear-gradient(160deg,#65236f,#1d2859)!important}.theme-dino{background:linear-gradient(160deg,#294b11,#241007)!important}.theme-magic{background:linear-gradient(160deg,#421b75,#071c49)!important}.theme-future{background:linear-gradient(160deg,#08265c,#07394b)!important}.theme-mystery{background:linear-gradient(160deg,#360b61,#030713)!important}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes roll{0%{transform:rotate(0) scale(1)}25%{transform:rotate(90deg) scale(.82)}50%{transform:rotate(190deg) scale(1.08)}75%{transform:rotate(285deg) scale(.88)}100%{transform:rotate(360deg) scale(1)}}@keyframes fall{to{transform:translateY(110dvh) rotate(720deg)}}
+
+@media(min-width:700px){
+ #gameScreen{padding:10px;gap:8px}.topbar{height:50px;min-height:50px}.brandMini{font-size:19px}.layout{width:min(96vw,900px);align-self:center}.left{height:29%}.center{height:47%}.right{height:24%}.dice{width:65px;height:65px;font-size:45px}
+}
+@media(max-height:650px){
+ #gameScreen{gap:3px}.topbar{height:38px;min-height:38px}.layout{gap:3px}.left{height:32%}.center{height:43%}.right{height:25%}.dice{width:48px;height:48px;font-size:32px}.rollBtn{min-height:31px}.dimensionScene{font-size:90%}.escapeCell{height:18px}
+}
+
+
+/* Friends room */
+.friendsPanel{margin:10px 0 2px;padding:12px;border:1px solid rgba(34,223,255,.32);border-radius:16px;background:linear-gradient(145deg,rgba(8,25,48,.92),rgba(7,10,27,.94));box-shadow:0 0 24px rgba(34,223,255,.08),inset 0 0 20px rgba(168,85,255,.05)}
+.friendsPanel.hidden{display:none}
+.roomRow{display:flex;align-items:stretch;gap:7px;margin-top:8px}
+.roomCodeBox{flex:1;min-width:0;padding:8px 11px;border-radius:11px;background:rgba(3,8,20,.85);border:1px solid #285c7e;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.roomLabel{font-size:9px;letter-spacing:1.4px;color:#7f9ab5;font-weight:900}
+#roomCode{font-size:16px;letter-spacing:3px;color:#ffe16b}
+.btn.small{padding:9px 11px;font-size:9px;white-space:nowrap}
+.btn.cyan{border-color:#25dfff;color:#bff7ff;background:linear-gradient(145deg,#123c50,#0a1827)}
+.friendActions{display:flex;gap:7px;margin-top:7px}
+.friendActions .btn{flex:1}
+.roomStatus{margin-top:8px;font-size:10px;color:#b9d1e5;line-height:1.35}
+.roomHint{margin-top:5px;font-size:8px;color:#718ba4;line-height:1.35}
+@media (max-width:520px){
+ .roomRow{flex-wrap:wrap}
+ .roomCodeBox{flex-basis:100%}
+ .roomRow>.btn{flex:1}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="setupScreen" class="screen active">
+ <div class="setup glass">
+  <div class="logo">TELEPORT<br>RUSH</div>
+  <div class="tag">ROLL • TELEPORT • ESCAPE • WIN</div>
+  <div class="setupSection">
+   <div class="sectionTitle">GAME MODE</div>
+   <div class="modeRow">
+    <button class="btn selected" data-mode="ai">🤖 PLAY WITH AI</button>
+    <button class="btn" data-mode="local">👥 LOCAL MULTIPLAYER</button>
+    <button class="btn" data-mode="friends">🌐 PLAY WITH FRIENDS</button>
+   </div>
+  </div>
+  <div class="setupSection">
+   <div class="sectionTitle">NUMBER OF PLAYERS</div>
+   <div class="countRow">
+    <button class="btn selected" data-count="2">2 PLAYERS</button>
+    <button class="btn" data-count="3">3 PLAYERS</button>
+    <button class="btn" data-count="4">4 PLAYERS</button>
+   </div>
+  </div>
+  <div id="friendsPanel" class="friendsPanel hidden">
+   <div class="sectionTitle">FRIEND ROOM</div>
+   <div class="roomRow">
+    <div class="roomCodeBox">
+     <span class="roomLabel">ROOM CODE</span>
+     <strong id="roomCode">------</strong>
+    </div>
+    <button id="copyRoom" class="btn small">📋 COPY</button>
+    <button id="shareRoom" class="btn small gold">📤 SHARE</button>
+   </div>
+   <div class="friendActions">
+    <button id="createRoom" class="btn small cyan">＋ CREATE ROOM</button>
+    <button id="joinRoom" class="btn small ghost">↗ JOIN ROOM</button>
+   </div>
+   <div id="roomStatus" class="roomStatus">Create a room, then share the code with your friends.</div>
+   <div class="roomHint">Invite links can be shared through WhatsApp, Messages or any supported app. Online turn synchronization requires a backend connection.</div>
+  </div>
+  <div class="setupSection">
+   <div class="sectionTitle">PLAYER NAMES</div>
+   <div id="names" class="names"></div>
+  </div>
+  <div class="setupActions">
+   <button id="rules" class="btn ghost">📖 HOW TO PLAY</button>
+   <button id="start" class="btn gold">🚀 START GAME</button>
+  </div>
+  <div class="tiny muted" style="text-align:center;margin-top:9px">Landscape-first • 50 spaces • 15 random dimensions • one token each</div>
+ </div>
+</section>
+
+<section id="gameScreen" class="screen">
+ <header class="topbar glass">
+  <div class="brandMini">🌀 TELEPORT RUSH</div>
+  <div id="turnBadge" class="turnBadge">PLAYER 1'S TURN</div>
+  <div class="spacer"></div>
+  <button id="sound" class="icon" title="Sound">🔊</button>
+  <button id="music" class="icon" title="Music">🎵</button>
+  <button id="restart" class="icon" title="Restart">↻</button>
+  <button id="menu" class="icon" title="Menu">☰</button>
+ </header>
+
+ <div class="layout">
+  <aside class="panel left glass">
+   <div id="normalPanel">
+    <div class="panelHead"><div class="panelTitle">🌌 TELEPORT NETWORK</div><div class="panelSub">15 WORLDS</div></div>
+    <div class="worldBanner">
+     <div class="planet"></div><div class="island"></div><div class="waterfall"></div>
+     <div class="bannerText"><div class="bannerTitle">THE DIMENSIONS</div><div class="bannerLine">Every portal hides a different challenge.</div></div>
+    </div>
+    <div class="portalOverview">
+     <div class="panelHead"><div class="panelTitle">🌀 PORTAL MAP</div><div class="panelSub">RANDOM EACH GAME</div></div>
+     <div id="portalGrid" class="portalGrid"></div>
+    </div>
+    <div class="tiny muted" style="margin-top:8px;line-height:1.35">Land exactly on a glowing portal. The board stays visible while your dimension appears here.</div>
+   </div>
+
+   <div id="dimensionPanel" class="hidden">
+    <div class="panelHead"><div class="panelTitle">🌀 ACTIVE DIMENSION</div><div id="dimensionPlayer" class="panelSub">VINNU</div></div>
+    <div id="dimensionScene" class="dimensionScene theme-galaxy">
+     <div class="sceneStars"></div><div class="sceneGlow"></div><div class="sceneObject"></div><div class="sceneCity"></div>
+     <div class="sceneLabel"><div id="dimensionName" class="sceneTitle">GALAXY WORLD</div><div id="portalBadge" class="badge">PORTAL #1</div></div>
+    </div>
+    <div class="challenge">
+     <div class="challengeTop"><div><div class="challengeTitle">ESCAPE CHALLENGE</div><div id="challengeText" class="tiny muted">REACH EXACTLY 15</div></div><div id="challengeScore" class="challengeScore">0 / 15</div></div>
+     <div class="bar"><i id="progress"></i></div>
+     <div class="challengeBottom"><span>15-SPACE ESCAPE PATH</span><span id="escapeStatus">IN DIMENSION</span></div>
+     <div class="escapeMapWrap">
+       <div class="escapeMapTitle">YOUR POSITION INSIDE THE TELEPORT</div>
+       <div id="escapeMap" class="escapeMap"></div>
+       <div class="zeroBadge">START / 0 → 15 • GOLD = EXIT TARGET • CYAN = YOUR POSITION</div>
+     </div>
+     <div id="rollHistory" class="rollHistory"></div>
+     <div class="rollHint">Rolls accumulate. Overshooting does not change your position. Reach the highlighted target exactly to escape.</div>
+    </div>
+   </div>
+  </aside>
+
+  <main class="center">
+   <div class="boardShell">
+    <div class="boardTitle">1 STARTS BELOW&nbsp;&nbsp;•&nbsp;&nbsp;50 FINISHES ABOVE&nbsp;&nbsp;•&nbsp;&nbsp;15 PORTALS</div>
+    <div id="board" class="board"></div>
+   </div>
+  </main>
+
+  <aside class="panel right glass">
+   <div class="diceCard">
+    <div id="dice" class="dice">⚄</div>
+    <div id="rollMode" class="rollMode">TAP TO ROLL</div>
+    <div id="rollSub" class="rollSub">Your move on the main board</div>
+    <button id="rollBtn" class="btn gold rollBtn">🎲 ROLL DICE</button>
+   </div>
+   <div class="turnCard">
+    <div class="turnLabel">CURRENT TURN</div>
+    <div id="turnName" class="turnName">Player 1</div>
+    <div id="turnStatus" class="turnStatus">Roll 6 to enter the board</div>
+   </div>
+   <div class="playersTitle">👥 PLAYERS</div>
+   <div id="players" class="players"></div>
+   <div class="recentTitle">📜 RECENT MOVES</div>
+   <div id="recent" class="recent"></div>
+   <div class="actions"><button id="rulesGame" class="btn ghost">📖 RULES</button><button id="end" class="btn danger">END TURN</button></div>
+ </aside>
+ </div>
+</section>
+
+<div id="overlay" class="overlay"><div id="modal" class="modal glass"></div></div>
+<div class="rotate"><div><div class="rotateIcon">📱</div><h2>ROTATE YOUR DEVICE</h2><p class="muted">Turn your phone sideways to enter Teleport Rush.</p></div></div>
+</div>
+<script>
+
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const DIE=["⚀","⚁","⚂","⚃","⚄","⚅"];
+const COLORS=["red","blue","green","yellow"];
+const HEX={red:"#ff4e6a",blue:"#37a9ff",green:"#39e5a0",yellow:"#ffd34f"};
+const AI=["Nova","Pixel","Zara","Bolt"];
+const THEMES=[
+ {name:"Galaxy World",target:15,kind:"galaxy",icon:"🌌"},
+ {name:"Cyber City",target:14,kind:"cyber",icon:"🏙️"},
+ {name:"Jungle World",target:13,kind:"jungle",icon:"🌿"},
+ {name:"Underwater World",target:12,kind:"water",icon:"🌊"},
+ {name:"Volcano World",target:11,kind:"volcano",icon:"🌋"},
+ {name:"Ice Kingdom",target:10,kind:"ice",icon:"❄️"},
+ {name:"Ancient Egypt",target:9,kind:"egypt",icon:"🏺"},
+ {name:"Sky Kingdom",target:8,kind:"sky",icon:"☁️"},
+ {name:"Robot Factory",target:7,kind:"robot",icon:"🤖"},
+ {name:"Pirate World",target:6,kind:"pirate",icon:"🏴‍☠️"},
+ {name:"Candy World",target:5,kind:"candy",icon:"🍭"},
+ {name:"Dinosaur World",target:4,kind:"dino",icon:"🦖"},
+ {name:"Magic Kingdom",target:3,kind:"magic",icon:"🪄"},
+ {name:"Future Earth",target:2,kind:"future",icon:"🚀"},
+ {name:"Mystery Dimension",target:1,kind:"mystery",icon:"🔮"}
+];
+const S={mode:"ai",count:2,players:[],current:0,portals:[],byPos:{},started:false,ended:false,busy:false,sound:true,music:false,musicTimer:null,roomCode:null,roomHost:false};
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+function audio(){try{window._ac ||= new (window.AudioContext||window.webkitAudioContext)();if(window._ac.state==="suspended")window._ac.resume();return window._ac}catch(e){return null}}
+function tone(f,d=.08,type="sine",g=.025,delay=0){if(!S.sound)return;const c=audio();if(!c)return;const t=c.currentTime+delay,o=c.createOscillator(),a=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(g,t+.01);a.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(a);a.connect(c.destination);o.start(t);o.stop(t+d+.02)}
+function sfx(n){if(!S.sound)return;const m={click:[[520,.05,"sine",.025]],roll:[[160,.08,"triangle",.03],[270,.08,"triangle",.03,.08],[430,.12,"triangle",.035,.16]],step:[[330,.045,"square",.018]],land:[[500,.09,"sine",.03],[700,.13,"sine",.025,.1]],portal:[[150,.15,"sawtooth",.025],[280,.2,"sawtooth",.025,.1],[560,.3,"sine",.035,.24]],escape:[[440,.12,"sine",.035],[660,.12,"sine",.035,.1],[880,.25,"sine",.04,.2]],win:[[523,.12,"triangle",.04],[659,.12,"triangle",.04,.12],[784,.14,"triangle",.04,.24],[1047,.4,"triangle",.05,.38]],bad:[[170,.14,"sawtooth",.025],[110,.18,"sawtooth",.02,.15]]};(m[n]||m.click).forEach(x=>tone(...x))}
+function musicPulse(){if(!S.music)return;tone(196,.5,"sine",.006);tone(247,.5,"sine",.005,.5);tone(294,.5,"sine",.004,1);S.musicTimer=setTimeout(musicPulse,3000)}
+
+
+function makeRoomCode(){
+ const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+ let code="";
+ for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+ return code;
+}
+function getInviteUrl(code){
+ try{
+  const u=new URL(location.href);
+  u.searchParams.set("room",code);
+  return u.toString();
+ }catch(e){return location.href+"?room="+encodeURIComponent(code)}
+}
+function updateRoomUI(){
+ const panel=$("friendsPanel");
+ if(panel)panel.classList.toggle("hidden",S.mode!=="friends");
+ const code=$("roomCode");
+ if(code)code.textContent=S.roomCode||"------";
+}
+function createFriendRoom(){
+ S.mode="friends";
+ S.roomCode=makeRoomCode();
+ S.roomHost=true;
+ try{localStorage.setItem("tr_room_code",S.roomCode)}catch(e){}
+ updateRoomUI();
+ const status=$("roomStatus");
+ if(status)status.textContent="Room created. Share the code or invite link with your friends.";
+ sfx("click");
+}
+function setRoomStatus(text){
+ const el=$("roomStatus");if(el)el.textContent=text;
+}
+async function copyFriendRoom(){
+ if(!S.roomCode){createFriendRoom()}
+ const text=`Join my Teleport Rush room: ${S.roomCode}\n${getInviteUrl(S.roomCode)}`;
+ try{
+  await navigator.clipboard.writeText(text);
+  setRoomStatus("Invite code + link copied. Send it to your friends.");
+ }catch(e){
+  try{
+   const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+   setRoomStatus("Invite code + link copied.");
+  }catch(e2){setRoomStatus("Copy failed. Room code: "+S.roomCode)}
+ }
+ sfx("click");
+}
+async function shareFriendRoom(){
+ if(!S.roomCode){createFriendRoom()}
+ const url=getInviteUrl(S.roomCode);
+ const data={title:"Teleport Rush",text:`Join my Teleport Rush room — Code: ${S.roomCode}`,url};
+ try{
+  if(navigator.share){
+   await navigator.share(data);
+   setRoomStatus("Invite shared successfully.");
+  }else{
+   await copyFriendRoom();
+  }
+ }catch(e){
+  if(e && e.name==="AbortError") return;
+  setRoomStatus("Use Copy to send the room code manually.");
+ }
+ sfx("click");
+}
+function joinFriendRoom(){
+ const entered=prompt("Enter the 6-character Teleport Rush room code:");
+ if(entered===null)return;
+ const code=entered.trim().toUpperCase();
+ if(!/^[A-Z0-9]{6}$/.test(code)){
+  setRoomStatus("Invalid room code. Please enter 6 letters/numbers.");
+  return;
+ }
+ S.mode="friends";S.roomCode=code;S.roomHost=false;
+ updateRoomUI();
+ setRoomStatus(`Room ${code} selected. Start the game when everyone is ready.`);
+ sfx("click");
+}
+function setupFriendRoom(){
+ if(S.mode==="friends" && !S.roomCode){
+  // Preserve an invite room code from the URL, if present.
+  try{
+   const incoming=new URLSearchParams(location.search).get("room");
+   if(incoming && /^[A-Z0-9]{6}$/i.test(incoming)){
+    S.roomCode=incoming.toUpperCase();S.roomHost=false;
+    setRoomStatus(`Invite received for room ${S.roomCode}. You can join this room.`);
+   }
+  }catch(e){}
+ }
+ updateRoomUI();
+}
+
+function renderNames(){
+ $("names").innerHTML="";
+ for(let i=0;i<S.count;i++){
+  const d=document.createElement("div");d.className="field";
+  const old=localStorage.getItem("tr_name_"+i)||(S.mode==="ai"&&i>0?AI[i-1]:"");
+  d.innerHTML=`<label><span class="dot" style="background:${HEX[COLORS[i]]};color:${HEX[COLORS[i]]}"></span>${i===0?"YOU":"PLAYER "+(i+1)}</label><input maxlength="16" data-i="${i}" placeholder="${i===0?"Enter your name":AI[i-1]||"Enter name"}" value="${esc(old)}">`;
+  $("names").appendChild(d);
+ }
+}
+document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("[data-mode]").forEach(x=>x.classList.remove("selected"));
+ b.classList.add("selected");
+ S.mode=b.dataset.mode;
+ if(S.mode==="friends")setupFriendRoom();else updateRoomUI();
+ renderNames();sfx("click");
+});
+document.querySelectorAll("[data-count]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-count]").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");S.count=+b.dataset.count;renderNames();sfx("click")});
+$("createRoom")?.addEventListener("click",createFriendRoom);
+$("copyRoom")?.addEventListener("click",copyFriendRoom);
+$("shareRoom")?.addEventListener("click",shareFriendRoom);
+$("joinRoom")?.addEventListener("click",joinFriendRoom);
+setupFriendRoom();
+
+function generatePortals(){
+ const pool=Array.from({length:48},(_,i)=>i+2),chosen=[];
+ // Prefer a minimum distance of two, then fill if necessary.
+ while(chosen.length<15){
+  const ok=pool.filter(p=>!chosen.includes(p)&&chosen.every(q=>Math.abs(p-q)>=2));
+  if(!ok.length)break;chosen.push(ok[Math.floor(Math.random()*ok.length)]);
+ }
+ for(const p of pool)if(chosen.length<15&&!chosen.includes(p))chosen.push(p);
+ chosen.sort((a,b)=>a-b);
+ S.portals=chosen.slice(0,15).map((pos,i)=>({id:i+1,pos,theme:THEMES[i]}));
+ S.byPos={};S.portals.forEach(p=>S.byPos[p.pos]=p);
+}
+function boardOrder(){
+ const out=[];
+ for(let r=9;r>=0;r--){
+  let a=[r*5+1,r*5+2,r*5+3,r*5+4,r*5+5];
+  if(r%2===1)a.reverse();
+  out.push(...a);
+ }
+ return out;
+}
+function renderBoard(){
+ const b=$("board");b.innerHTML="";
+ boardOrder().forEach(n=>{
+  const c=document.createElement("div");c.className="cell";c.dataset.pos=n;
+  if(n===1)c.classList.add("start");if(n===50)c.classList.add("finish");
+  const p=S.byPos[n];
+  c.innerHTML=p?`<span class="portalRing"></span><span class="cellNum">${n}</span><div class="tokenLayer"></div>`:`<span class="cellNum">${n===50?"🏆 50":n}</span><div class="tokenLayer"></div>`;
+  if(p)c.title=`Portal #${p.id} • ${p.theme.name} • Escape ${p.theme.target}`;
+  b.appendChild(c);
+ });
+ renderTokens();
+}
+function renderTokens(){
+ document.querySelectorAll(".tokenLayer").forEach(x=>x.innerHTML="");
+ S.players.forEach(p=>{
+  if(!p.entered||p.inTeleport||p.position<1)return;
+  const layer=document.querySelector(`.cell[data-pos="${p.position}"] .tokenLayer`);if(!layer)return;
+  const t=document.createElement("div");t.className=`token ${p.color}`;t.title=p.name;layer.appendChild(t);
+ });
+}
+function makePlayers(){
+ S.players=[];
+ for(let i=0;i<S.count;i++){
+  const inp=$("names").querySelector(`input[data-i="${i}"]`);
+  let name=(inp?.value||"").trim();if(!name)name=(S.mode==="ai"&&i>0)?AI[i-1]:`Player ${i+1}`;
+  localStorage.setItem("tr_name_"+i,name);
+  S.players.push({id:i+1,name,color:COLORS[i],position:0,entered:false,inTeleport:false,isAI:S.mode==="ai"&&i>0,
+   teleportData:{portalId:null,portalPosition:null,targetScore:0,currentScore:0,rolls:[]}});
+ }
+}
+function cur(){return S.players[S.current]}
+function status(p){return p.inTeleport?`🌀 ${p.teleportData.currentScore}/${p.teleportData.targetScore}`:p.entered?`Position ${p.position}`:"At Start"}
+
+function renderPortalGrid(){
+ $("portalGrid").innerHTML="";
+ S.portals.forEach(p=>{const d=document.createElement("div");d.className="pchip";d.innerHTML=`<b>#${p.id}</b>${p.pos}`;$("portalGrid").appendChild(d)});
+}
+function addMove(text,p){
+ const r=document.createElement("div");r.className="move";r.innerHTML=`<b style="color:${HEX[p?.color||"blue"]}">${esc(p?.name||"GAME")}</b> ${esc(text)}`;
+ $("recent").prepend(r);while($("recent").children.length>6)$("recent").lastChild.remove();
+}
+function renderPlayers(){
+ $("players").innerHTML="";
+ S.players.forEach((p,i)=>{
+  const d=document.createElement("div");d.className="player"+(i===S.current?" active":"");
+  d.innerHTML=`<div class="avatar" style="color:${HEX[p.color]}">${esc(p.name.slice(0,2).toUpperCase())}</div>
+  <div><div class="pname">${esc(p.name)}</div><div class="pmeta">Position ${p.position}</div></div><div class="pstatus">${status(p)}</div>`;
+  $("players").appendChild(d);
+ });
+ const p=cur();$("turnBadge").textContent=`${p.name.toUpperCase()}'S TURN`;$("turnName").textContent=p.name;$("turnName").style.color=HEX[p.color];
+ $("turnStatus").textContent=p.inTeleport?`Escape ${p.teleportData.currentScore}/${p.teleportData.targetScore}`:p.entered?"Roll to move":"Roll 6 to enter the board";
+ $("rollMode").textContent=p.inTeleport?"DIMENSION ESCAPE":"TAP TO ROLL";
+ $("rollSub").textContent=p.inTeleport?`Reach exactly ${p.teleportData.targetScore}`:p.entered?`Move from position ${p.position}`:"You need a 6 to enter";
+ $("rollBtn").textContent=p.inTeleport?"🌀 ROLL FOR ESCAPE":"🎲 ROLL DICE";
+ $("rollBtn").classList.toggle("purple",p.inTeleport);$("rollBtn").classList.toggle("gold",!p.inTeleport);
+}
+function renderEscapeMap(p){
+ const td=p.teleportData;
+ const map=$("escapeMap"); if(!map) return;
+ map.innerHTML="";
+ for(let n=1;n<=15;n++){
+  const c=document.createElement("div");
+  c.className="escapeCell"+(n===td.targetScore?" target":"")+(n===td.currentScore?" current":"");
+  c.textContent=n;
+  if(n===td.currentScore){
+   const tok=document.createElement("span"); tok.className=`escapeToken ${p.color}`; tok.style.color=HEX[p.color]; c.appendChild(tok);
+  }
+  map.appendChild(c);
+ }
+}
+function showDimension(p){
+ const td=p.teleportData,t=THEMES[td.portalId-1];
+ $("normalPanel").classList.add("hidden");$("dimensionPanel").classList.remove("hidden");
+ $("dimensionPlayer").textContent=p.name.toUpperCase();
+ $("dimensionName").textContent=t.name.toUpperCase();$("portalBadge").textContent=`PORTAL #${td.portalId}`;
+ $("challengeText").textContent=`REACH EXACTLY ${td.targetScore}`;$("challengeScore").textContent=`${td.currentScore} / ${td.targetScore}`;
+ $("progress").style.width=(td.currentScore/td.targetScore*100)+"%";$("escapeStatus").textContent=td.currentScore===td.targetScore?"EXIT READY":"IN DIMENSION";
+ $("rollHistory").innerHTML=td.rolls.slice(-8).map(n=>`<span class="rollDot">${DIE[n-1]}</span>`).join("");
+ renderEscapeMap(p);
+ const sc=$("dimensionScene");sc.className=`dimensionScene theme-${t.kind}`;
+}
+function hideDimension(){$("dimensionPanel").classList.add("hidden");$("normalPanel").classList.remove("hidden")}
+function refresh(){renderPlayers();renderTokens();cur().inTeleport?showDimension(cur()):hideDimension()}
+
+function startGame(){
+ makePlayers();generatePortals();S.current=0;S.started=true;S.ended=false;S.busy=false;
+ $("setupScreen").classList.remove("active");$("gameScreen").classList.add("active");
+ $("recent").innerHTML="";renderPortalGrid();renderBoard();refresh();
+ addMove("game started • 15 portals are hidden across the board",null);sfx("click");
+}
+$("start")?.addEventListener("click",startGame);
+
+async function animateDice(){
+ const d=$("dice");d.classList.remove("roll");void d.offsetWidth;d.classList.add("roll");sfx("roll");await wait(620);
+}
+function setDice(n){$("dice").textContent=DIE[n-1]}
+async function roll(){
+ if(S.ended||S.busy)return;
+ const p=cur();S.busy=true;$("rollBtn").disabled=true;
+ await animateDice();const n=1+Math.floor(Math.random()*6);setDice(n);
+ if(p.inTeleport)await dimensionRoll(p,n);else await boardRoll(p,n);
+ if(!S.ended){nextTurn()}
+ $("rollBtn").disabled=false;
+}
+$("rollBtn").onclick=roll;
+
+async function boardRoll(p,n){
+ addMove(`rolled ${n}`,p);
+ if(!p.entered){
+  if(n===6){p.entered=true;p.position=1;addMove("entered the board at position 1",p);sfx("land");renderTokens();await wait(260)}
+  else{addMove("needs a 6 to enter",p);sfx("bad");return}
+ }else{
+  if(p.position+n>50){addMove(`cannot move — needs ${50-p.position} exactly`,p);sfx("bad");return}
+  for(let i=0;i<n;i++){p.position++;renderTokens();sfx("step");await wait(105)}
+  sfx("land");addMove(`moved to position ${p.position}`,p);
+ }
+ if(p.position===50){await win(p);return}
+ const portal=S.byPos[p.position];if(portal)await enterPortal(p,portal);
+}
+async function enterPortal(p,portal){
+ p.inTeleport=true;p.teleportData={portalId:portal.id,portalPosition:portal.pos,targetScore:portal.theme.target,currentScore:0,rolls:[]};
+ addMove(`entered Portal #${portal.id} — ${portal.theme.name}`,p);sfx("portal");showDimension(p);
+ const cell=document.querySelector(`.cell[data-pos="${portal.pos}"]`);if(cell){cell.style.transform="scale(1.04)";await wait(450);cell.style.transform=""}
+ renderTokens();
+}
+async function dimensionRoll(p,n){
+ const td=p.teleportData;td.rolls.push(n);showDimension(p);addMove(`rolled ${n} in ${THEMES[td.portalId-1].name}`,p);
+ if(td.currentScore+n>td.targetScore){addMove(`overshot — score remains ${td.currentScore}/${td.targetScore}`,p);sfx("bad");showDimension(p);return}
+ td.currentScore+=n;showDimension(p);sfx("land");
+ if(td.currentScore===td.targetScore){
+  $("escapeStatus").textContent="EXIT READY";addMove("escape target reached!",p);sfx("escape");await wait(650);
+  const exit=td.portalPosition+1;p.position=exit;p.inTeleport=false;
+  addMove(`escaped and returned to position ${exit}`,p);p.teleportData={portalId:null,portalPosition:null,targetScore:0,currentScore:0,rolls:[]};
+  hideDimension();renderTokens();await wait(350);
+  if(p.position>=50){await win(p);return}
+ }
+}
+function nextTurn(){
+ if(S.ended)return;S.current=(S.current+1)%S.players.length;S.busy=false;refresh();
+ const p=cur();addMove("turn",p);if(p.isAI)setTimeout(roll,650);
+}
+$("end").onclick=()=>{if(!S.busy&&!S.ended)nextTurn()};
+
+async function win(p){
+ S.ended=true;S.busy=true;sfx("win");
+ $("modal").innerHTML=`<div style="text-align:center"><div class="winOrb"></div><div class="winTitle">🏆 ${esc(p.name)} WINS!</div>
+ <p><b>TELEPORT MASTER</b><br>50 / 50 • The journey is complete.</p>
+ <div class="modalBtns"><button id="again" class="btn gold">▶ PLAY AGAIN</button><button id="home" class="btn ghost">🏠 MAIN MENU</button></div></div>`;
+ const cf=document.createElement("div");cf.className="confetti";
+ for(let i=0;i<35;i++){const x=document.createElement("i");x.style.left=Math.random()*100+"%";x.style.animationDelay=Math.random()*1.8+"s";x.style.opacity=.5+Math.random()*.5;cf.appendChild(x)}$("modal").appendChild(cf);$("overlay").classList.add("show");
+ $("again").onclick=()=>{$("overlay").classList.remove("show");startGame()};$("home").onclick=()=>{$("overlay").classList.remove("show");$("gameScreen").classList.remove("active");$("setupScreen").classList.add("active");renderNames()};
+}
+
+function showRules(){
+ $("modal").innerHTML=`<h2>🌀 How to Play</h2>
+ <p><b>1.</b> Enter your name and choose 2–4 players.</p><p><b>2.</b> Everyone begins at <b>0</b>. Roll <b>6</b> to enter at <b>1</b>.</p>
+ <p><b>3.</b> Race upward from <b>1 at the bottom</b> to <b>50 at the top</b>. You must land on 50 exactly.</p>
+ <p><b>4.</b> Land exactly on a glowing portal. Its dimension stays visible on the left while the main board remains visible.</p>
+ <p><b>5.</b> Dimension targets are 15 down to 1. Dice rolls accumulate. Overshooting does not change the score.</p>
+ <p><b>6.</b> Reach the target exactly, then return to the box immediately after the portal.</p>
+ <p><b>7.</b> Players inside dimensions do not freeze the game. Turns continue normally.</p><p><b>8.</b> No capturing. First to 50 wins.</p>
+ <div class="modalBtns"><button id="close" class="btn gold">GOT IT</button></div>`;$("overlay").classList.add("show");$("close").onclick=()=>$("overlay").classList.remove("show")
+}
+$("rules").onclick=showRules;$("rulesGame").onclick=showRules;
+$("overlay").onclick=e=>{if(e.target===$("overlay"))$("overlay").classList.remove("show")};
+
+$("sound").onclick=()=>{S.sound=!S.sound;$("sound").textContent=S.sound?"🔊":"🔇";if(S.sound)sfx("click")};
+$("music").onclick=()=>{S.music=!S.music;$("music").textContent=S.music?"🎵":"🔕";if(S.music){audio();musicPulse()}else clearTimeout(S.musicTimer)};
+$("restart").onclick=()=>{if(confirm("Restart this match?"))startGame()};
+$("menu").onclick=()=>{if(confirm("Return to player setup?")){$("gameScreen").classList.remove("active");$("setupScreen").classList.add("active");renderNames()}};
+document.addEventListener("click",e=>{if(e.target.matches("button")&&!e.target.disabled&&!["sound","music"].includes(e.target.id))sfx("click")});
+document.addEventListener("keydown",e=>{if((e.code==="Space"||e.key.toLowerCase()==="r")&&$("gameScreen").classList.contains("active")&&!S.busy&&!S.ended&&!$("overlay").classList.contains("show")){e.preventDefault();roll()}});
+renderNames();
+})();
+
+</script>
+</body>
+</html>
